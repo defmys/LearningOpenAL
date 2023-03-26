@@ -20,6 +20,14 @@ find_library(
     PATHS /opt/homebrew/opt/openal-soft/lib
 )
 
+find_package(SndFile REQUIRED)
+
 add_executable(${target} ${source})
+add_dependencies(${target} copy_resources)
 target_include_directories(${target} PRIVATE /opt/homebrew/opt/openal-soft/include)
-target_link_libraries(${target} ${openal})
+target_link_libraries(${target} ${openal} SndFile::sndfile)
+
+add_custom_target(
+    copy_resources
+    COMMAND cp -r ${CMAKE_CURRENT_LIST_DIR}/resource/ ${CMAKE_CURRENT_BINARY_DIR}/resource/
+)
