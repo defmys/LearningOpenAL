@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "helperfunctions.h"
+
 #include "AL/alc.h"
 #include "AL/al.h"
 #include "sndfile.h"
