@@ -18,10 +18,10 @@ void AudioSystem::Shutdown()
     {
         ALCboolean bSuccess = ALC_FALSE;
 
-        alCall(alcMakeContextCurrent, bSuccess, m_device, nullptr);
-        alCall(alcDestroyContext, m_device, m_context);
+        alcCall(alcMakeContextCurrent, bSuccess, m_device, nullptr);
+        alcCall(alcDestroyContext, m_device, m_context);
 
-        alCall(alcCloseDevice, bSuccess, m_device, m_device);
+        alcCall(alcCloseDevice, bSuccess, m_device, m_device);
         m_device = nullptr;
     }
 }
@@ -37,10 +37,10 @@ void AudioSystem::CreateDevice()
 
 void AudioSystem::CreateContext()
 {
-    assert(alCall(alcCreateContext, m_context, m_device, m_device, nullptr));
+    assert(alcCall(alcCreateContext, m_context, m_device, m_device, nullptr));
     assert(m_context);
 
     ALCboolean bSuccess = ALC_FALSE;
-    assert(alCall(alcMakeContextCurrent, bSuccess, m_device, m_context));
+    assert(alcCall(alcMakeContextCurrent, bSuccess, m_device, m_context));
     assert(bSuccess == ALC_TRUE);
 }

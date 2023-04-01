@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-bool check_al_errors(const char* filename, uint32_t line, ALCdevice* device)
+bool check_alc_errors(const char* filename, uint32_t line, ALCdevice* device)
 {
     ALenum error = alcGetError(device);
     if (error != AL_NO_ERROR)
