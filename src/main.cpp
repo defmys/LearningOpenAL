@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "AudioSystem.h"
 #include "helperfunctions.h"
 
 #include "AL/alc.h"
@@ -23,6 +24,11 @@ int main(int argc, const char** argv)
     {
         sf_close(sndFile);
     }
+
+    AudioSystem audioSystem;
+    audioSystem.Init();
+
+    audioSystem.Shutdown();
 
     return 0;
 }
