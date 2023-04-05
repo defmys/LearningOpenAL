@@ -26,7 +26,7 @@ auto alCallImpl(const char* filename, uint32_t line, alFunction function, Params
 bool check_alc_errors(const char* filename, uint32_t line, ALCdevice* device);
 
 template<typename alcFunction, typename ReturnType, typename... Params>
-auto alcCallImpl(const char* filename, uint32_t line, alcFunction function, ReturnType& ret, ALCdevice* device, Params... params)
+auto alcCallImpl(const char* filename, uint32_t line, alcFunction function, ALCdevice* device, ReturnType& ret, Params... params)
     -> typename std::enable_if_t<!std::is_same_v<void, decltype(function(params...))>, bool>
 {
     ret = function(std::forward<Params>(params)...);
