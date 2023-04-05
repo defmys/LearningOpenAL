@@ -8,6 +8,8 @@
 #include "AL/al.h"
 #include "sndfile.h"
 
+#include <unistd.h>
+
 int main(int argc, const char** argv) 
 {
     std::string fullPath(argv[0]);
@@ -17,16 +19,18 @@ int main(int argc, const char** argv)
     audioSystem.Init();
 
     std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem.wav";
-    AudioSample* sample = new AudioSample;
-    sample->LoadResource(wavFile.c_str());
-    sample->Play();
+    audioSystem.CreateAudioSample("test", wavFile.c_str());
+    audioSystem.Play("test");
 
-    while (sample->GetState() == AL_PLAYING)
+    std::string swooshFile = exeDir + "resource/swoosh.mp3";
+    audioSystem.CreateAudioSample("swoosh", swooshFile.c_str());
+    audioSystem.Play("swoosh");
+    
+    while (audioSystem.IsPlayingSometing())
     {
-        sample->Update();
-    }
-    delete(sample);
-    sample = nullptr;
+        audioSystem.Update();
+        usleep(30.f);
+    };
 
     audioSystem.Shutdown();
 

@@ -24,11 +24,14 @@ AudioSample::~AudioSample()
     {
         alCall(alDeleteBuffers, 1, &m_buffer);
         m_buffer = AL_INVALID;
+
+        std::cout << __FUNCTION__ << std::endl;
     }
 }
 
-void AudioSample::LoadResource(const char *filename)
+bool AudioSample::LoadResource(const char *filename)
 {
+    bool bSuccess = false;
     if (m_buffer == AL_INVALID)
     {
         SF_INFO sndInfo{};
@@ -36,7 +39,7 @@ void AudioSample::LoadResource(const char *filename)
         if (!sndFile)
         {
             std::cerr << "failed to load " << filename << std::endl;
-            return;
+            return false;
         }
 
         AudioFormatContext formatContext{};
@@ -57,6 +60,7 @@ void AudioSample::LoadResource(const char *filename)
                 }
 
                 CreateSource();
+                bSuccess = true;
             }
             else
             {
@@ -66,6 +70,8 @@ void AudioSample::LoadResource(const char *filename)
 
         sf_close(sndFile);
     }
+
+    return bSuccess;
 }
 
 bool AudioSample::LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo, AudioFormatContext& formatContext)

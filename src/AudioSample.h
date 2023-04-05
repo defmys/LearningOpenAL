@@ -17,7 +17,7 @@ class AudioSample
 public:
     ~AudioSample();
 
-    void LoadResource(const char* filename);
+    bool LoadResource(const char* filename);
     void Play();
     void Update();
     ALint GetState() const { return m_state; }
