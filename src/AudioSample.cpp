@@ -19,19 +19,18 @@ AudioSample::~AudioSample()
     {
         alCall(alDeleteSources, 1, &m_source);
         m_source = AL_INVALID;
+
+        std::cout << __FUNCTION__ << std::endl;
     }
-    if (m_buffer)
+    if (m_buffer != AL_INVALID)
     {
         alCall(alDeleteBuffers, 1, &m_buffer);
         m_buffer = AL_INVALID;
-
-        std::cout << __FUNCTION__ << std::endl;
     }
 }
 
 bool AudioSample::LoadResource(const char *filename)
 {
-    bool bSuccess = false;
     if (m_buffer == AL_INVALID)
     {
         SF_INFO sndInfo{};
@@ -42,39 +41,27 @@ bool AudioSample::LoadResource(const char *filename)
             return false;
         }
 
-        AudioFormatContext formatContext{};
-        if (LoadFormat(sndFile, sndInfo, formatContext))
+        if (!LoadFormat(sndFile, sndInfo))
         {
-            if (alCall(alGenBuffers, 1, &m_buffer))
-            {
-                if(formatContext.splblockalign > 1)
-                {
-                    alCall(alBufferi, m_buffer, AL_UNPACK_BLOCK_ALIGNMENT_SOFT, formatContext.splblockalign);
-                }
-                alCall(alBufferData, m_buffer, formatContext.format, formatContext.membuf, formatContext.numBytes, sndInfo.samplerate);
-
-                if (formatContext.membuf)
-                {
-                    free(formatContext.membuf);
-                    formatContext.membuf = nullptr;
-                }
-
-                CreateSource();
-                bSuccess = true;
-            }
-            else
-            {
-                std::cerr << "failed to create al buffer for " << filename << std::endl;
-            }
+            return false;
         }
 
+        m_context.sampleRate = sndInfo.samplerate;
+        CreateBuffer();
+
+        if (!m_bPersistantMemBuf && !m_context.membuf.empty())
+        {
+            m_context.membuf.clear();
+        }
         sf_close(sndFile);
+
+        CreateSource();
     }
 
-    return bSuccess;
+    return true;
 }
 
-bool AudioSample::LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo, AudioFormatContext& formatContext)
+bool AudioSample::LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo)
 {
     FormatType sampleFormat = FormatType::Int16;
     switch ((sndInfo.format & SF_FORMAT_SUBMASK))
@@ -152,16 +139,16 @@ bool AudioSample::LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo, AudioForm
 
                 if(sampleFormat == FormatType::IMA4)
                 {
-                    formatContext.splblockalign = (byteblockalign/sndInfo.channels - 4)/4*8 + 1;
-                    if(formatContext.splblockalign < 1 || ((formatContext.splblockalign-1)/2 + 4)*sndInfo.channels != byteblockalign)
+                    m_context.splblockalign = (byteblockalign/sndInfo.channels - 4)/4*8 + 1;
+                    if(m_context.splblockalign < 1 || ((m_context.splblockalign-1)/2 + 4)*sndInfo.channels != byteblockalign)
                     {
                         sampleFormat = FormatType::Int16;
                     }
                 }
                 else
                 {
-                    formatContext.splblockalign = (byteblockalign/sndInfo.channels - 7)*2 + 2;
-                    if(formatContext.splblockalign < 2 || ((formatContext.splblockalign-2)/2 + 7)*sndInfo.channels != byteblockalign)
+                    m_context.splblockalign = (byteblockalign/sndInfo.channels - 7)*2 + 2;
+                    if(m_context.splblockalign < 2 || ((m_context.splblockalign-2)/2 + 7)*sndInfo.channels != byteblockalign)
                     {
                         sampleFormat = FormatType::Int16;
                     }
@@ -174,12 +161,12 @@ bool AudioSample::LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo, AudioForm
 
     if(sampleFormat == FormatType::Int16)
     {
-        formatContext.splblockalign = 1;
+        m_context.splblockalign = 1;
         byteblockalign = sndInfo.channels * 2;
     }
     else if(sampleFormat == FormatType::Float)
     {
-        formatContext.splblockalign = 1;
+        m_context.splblockalign = 1;
         byteblockalign = sndInfo.channels * 4;
     }
 
@@ -187,33 +174,33 @@ bool AudioSample::LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo, AudioForm
     if(sndInfo.channels == 1)
     {
         if(sampleFormat == FormatType::Int16)
-            formatContext.format = AL_FORMAT_MONO16;
+            m_context.format = AL_FORMAT_MONO16;
         else if(sampleFormat == FormatType::Float)
-            formatContext.format = AL_FORMAT_MONO_FLOAT32;
+            m_context.format = AL_FORMAT_MONO_FLOAT32;
         else if(sampleFormat == FormatType::IMA4)
-            formatContext.format = AL_FORMAT_MONO_IMA4;
+            m_context.format = AL_FORMAT_MONO_IMA4;
         else if(sampleFormat == FormatType::MSADPCM)
-            formatContext.format = AL_FORMAT_MONO_MSADPCM_SOFT;
+            m_context.format = AL_FORMAT_MONO_MSADPCM_SOFT;
     }
     else if(sndInfo.channels == 2)
     {
         if(sampleFormat == FormatType::Int16)
-            formatContext.format = AL_FORMAT_STEREO16;
+            m_context.format = AL_FORMAT_STEREO16;
         else if(sampleFormat == FormatType::Float)
-            formatContext.format = AL_FORMAT_STEREO_FLOAT32;
+            m_context.format = AL_FORMAT_STEREO_FLOAT32;
         else if(sampleFormat == FormatType::IMA4)
-            formatContext.format = AL_FORMAT_STEREO_IMA4;
+            m_context.format = AL_FORMAT_STEREO_IMA4;
         else if(sampleFormat == FormatType::MSADPCM)
-            formatContext.format = AL_FORMAT_STEREO_MSADPCM_SOFT;
+            m_context.format = AL_FORMAT_STEREO_MSADPCM_SOFT;
     }
     else if(sndInfo.channels == 3)
     {
         if(sf_command(sndFile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
         {
             if(sampleFormat == FormatType::Int16)
-                formatContext.format = AL_FORMAT_BFORMAT2D_16;
+                m_context.format = AL_FORMAT_BFORMAT2D_16;
             else if(sampleFormat == FormatType::Float)
-                formatContext.format = AL_FORMAT_BFORMAT2D_FLOAT32;
+                m_context.format = AL_FORMAT_BFORMAT2D_FLOAT32;
         }
     }
     else if(sndInfo.channels == 4)
@@ -221,52 +208,69 @@ bool AudioSample::LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo, AudioForm
         if(sf_command(sndFile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
         {
             if(sampleFormat == FormatType::Int16)
-                formatContext.format = AL_FORMAT_BFORMAT3D_16;
+                m_context.format = AL_FORMAT_BFORMAT3D_16;
             else if(sampleFormat == FormatType::Float)
-                formatContext.format = AL_FORMAT_BFORMAT3D_FLOAT32;
+                m_context.format = AL_FORMAT_BFORMAT3D_FLOAT32;
         }
     }
-    if(!formatContext.format)
+    if(!m_context.format)
     {
         std::cerr << "Unsupported channel count: " << sndInfo.channels << std::endl;
         return false;
     }
-    if(sndInfo.frames/formatContext.splblockalign > (sf_count_t)(INT_MAX/byteblockalign))
+    if(sndInfo.frames/m_context.splblockalign > (sf_count_t)(INT_MAX/byteblockalign))
     {
         std::cerr << "Too many samples (" << sndInfo.frames << ")" << std::endl;
         return false;
     }
 
     /* Decode the whole audio file to a buffer. */
-    formatContext.membuf = malloc((size_t)(sndInfo.frames / formatContext.splblockalign * byteblockalign));
+    m_context.membuf.resize((size_t)(sndInfo.frames / m_context.splblockalign * byteblockalign));
 
     sf_count_t numFrames = 0;
     if(sampleFormat == FormatType::Int16)
     {
-        numFrames = sf_readf_short(sndFile, (short*)formatContext.membuf, sndInfo.frames);
+        numFrames = sf_readf_short(sndFile, (short*)m_context.membuf.data(), sndInfo.frames);
     }
     else if(sampleFormat == FormatType::Float)
     {
-        numFrames = sf_readf_float(sndFile, (float*)formatContext.membuf, sndInfo.frames);
+        numFrames = sf_readf_float(sndFile, (float*)m_context.membuf.data(), sndInfo.frames);
     }
     else
     {
-        sf_count_t count = sndInfo.frames / formatContext.splblockalign * byteblockalign;
-        numFrames = sf_read_raw(sndFile, formatContext.membuf, count);
+        sf_count_t count = sndInfo.frames / m_context.splblockalign * byteblockalign;
+        numFrames = sf_read_raw(sndFile, m_context.membuf.data(), count);
         if(numFrames > 0)
         {
-            numFrames = numFrames / byteblockalign * formatContext.splblockalign;
+            numFrames = numFrames / byteblockalign * m_context.splblockalign;
         }
     }
 
     if(numFrames < 1)
     {
-        free(formatContext.membuf);
+        m_context.membuf.clear();
         std::cerr << "Failed to read samples (" << numFrames << ")" << std::endl;
         return false;
     }
 
-    formatContext.numBytes = (ALsizei)(numFrames / formatContext.splblockalign * byteblockalign);
+    m_context.numBytes = (ALsizei)(numFrames / m_context.splblockalign * byteblockalign);
+
+    return true;
+}
+
+bool AudioSample::CreateBuffer()
+{
+    if (!alCall(alGenBuffers, 1, &m_buffer))
+    {
+        std::cerr << "failed to create al buffer" << std::endl;
+        return false;
+    }
+
+    if(m_context.splblockalign > 1)
+    {
+        alCall(alBufferi, m_buffer, AL_UNPACK_BLOCK_ALIGNMENT_SOFT, m_context.splblockalign);
+    }
+    alCall(alBufferData, m_buffer, m_context.format, m_context.membuf.data(), m_context.numBytes, m_context.sampleRate);
 
     return true;
 }
@@ -297,4 +301,107 @@ void AudioSample::Update()
     {
         alCall(alGetSourcei, m_source, AL_SOURCE_STATE, &m_state);
     }
+}
+
+AudioStreamingSample::AudioStreamingSample()
+{
+    m_bPersistantMemBuf = true;
+}
+
+AudioStreamingSample::~AudioStreamingSample()
+{
+    ALint numQueued = 0;
+    alCall(alGetSourcei, m_source, AL_BUFFERS_QUEUED, &numQueued);
+
+    if (numQueued > 0)
+    {
+        std::vector<ALuint> buffers(numQueued);
+        alCall(alSourceUnqueueBuffers, m_source, numQueued, buffers.data());
+    }
+
+    alCall(alDeleteBuffers, m_buffers.size(), m_buffers.data());
+}
+
+void AudioStreamingSample::Update()
+{
+    if (m_source)
+    {
+        alCall(alGetSourcei, m_source, AL_SOURCE_STATE, &m_state);
+
+        if (GetState() == AL_PLAYING)
+        {
+            ALint processed = 0;
+            if (alCall(alGetSourcei, m_source, AL_BUFFERS_PROCESSED, &processed))
+            {
+                while (processed > 0)
+                {
+                    ALuint buffer;
+                    alCall(alSourceUnqueueBuffers, m_source, 1, &buffer);
+
+                    std::vector<uint8_t> data;
+                    data.resize(BUFFER_SIZE);
+                    memset(data.data(), 0, BUFFER_SIZE);
+
+                    size_t dataSizeToCopy = BUFFER_SIZE;
+                    if (m_cursor + BUFFER_SIZE > m_context.membuf.size())
+                    {
+                        dataSizeToCopy = m_context.membuf.size() - m_cursor;
+                    }
+                    memcpy(data.data(), &m_context.membuf[m_cursor], dataSizeToCopy);
+                    m_cursor += dataSizeToCopy;
+
+                    /*
+                    // loop
+                    if (dataSizeToCopy < BUFFER_SIZE)
+                    {
+                        m_cursor = 0;
+                        memcpy(&data[dataSizeToCopy], &m_context.membuf[m_cursor], BUFFER_SIZE - dataSizeToCopy);
+                        m_cursor = BUFFER_SIZE - dataSizeToCopy;
+                    }
+                    */
+
+                    if (dataSizeToCopy > 0) 
+                    {
+                        alCall(alBufferData, buffer, m_context.format, data.data(), dataSizeToCopy, m_context.sampleRate);
+                        alCall(alSourceQueueBuffers, m_source, 1, &buffer);
+                    }
+
+                    processed--;
+                }
+            }
+        }
+    }
+    else
+    {
+        m_source = AL_STOPPED;
+    }
+}
+
+bool AudioStreamingSample::CreateBuffer()
+{
+    if (!alCall(alGenBuffers, NUM_BUFFERS, m_buffers.data()))
+    {
+        std::cerr << "failed to create al buffer" << std::endl;
+        return false;
+    }
+
+    for (size_t i = 0; i < NUM_BUFFERS; ++i)
+    {
+        alCall(alBufferData, m_buffers[i], m_context.format, &m_context.membuf[i * BUFFER_SIZE], BUFFER_SIZE, m_context.sampleRate);
+    }
+    
+
+    return true;
+}
+
+void AudioStreamingSample::CreateSource()
+{
+    alCall(alGenSources, 1, &m_source);
+    alCall(alSourcef, m_source, AL_PITCH, 1);
+    alCall(alSourcef, m_source, AL_GAIN, 1.0f);
+    alCall(alSource3f, m_source, AL_POSITION, 0, 0, 0);
+    alCall(alSource3f, m_source, AL_VELOCITY, 0, 0, 0);
+    alCall(alSourcei, m_source, AL_LOOPING, AL_FALSE);
+
+    alCall(alSourceQueueBuffers, m_source, NUM_BUFFERS, m_buffers.data());
 }

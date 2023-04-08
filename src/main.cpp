@@ -23,13 +23,13 @@ int main(int argc, const char** argv)
     audioSystem.Play("test");
 
     std::string swooshFile = exeDir + "resource/swoosh.mp3";
-    audioSystem.CreateAudioSample("swoosh", swooshFile.c_str());
+    audioSystem.CreateAudioSample<AudioStreamingSample>("swoosh", swooshFile.c_str());
     audioSystem.Play("swoosh");
     
     while (audioSystem.IsPlayingSometing())
     {
         audioSystem.Update();
-        usleep(30.f);
+        usleep(30000.f);
     };
 
     audioSystem.Shutdown();
