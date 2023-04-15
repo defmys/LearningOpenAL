@@ -19,7 +19,7 @@ int main(int argc, const char** argv)
     audioSystem.Init();
 
     // std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem.wav";
-    std::string wavFile = exeDir + "resource/wooden-thud-mono.mp3";
+    std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem-mono.wav";
     audioSystem.CreateAudioSample("test", wavFile.c_str());
     audioSystem.Play("test");
 
