@@ -18,13 +18,14 @@ int main(int argc, const char** argv)
     AudioSystem audioSystem;
     audioSystem.Init();
 
-    std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem.wav";
+    // std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem.wav";
+    std::string wavFile = exeDir + "resource/wooden-thud-mono.mp3";
     audioSystem.CreateAudioSample("test", wavFile.c_str());
     audioSystem.Play("test");
 
     std::string swooshFile = exeDir + "resource/swoosh.mp3";
     audioSystem.CreateAudioSample<AudioStreamingSample>("swoosh", swooshFile.c_str());
-    audioSystem.Play("swoosh");
+    // audioSystem.Play("swoosh");
     
     while (audioSystem.IsPlayingSometing())
     {

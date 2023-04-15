@@ -12,6 +12,7 @@ void AudioSystem::Init()
 {
     CreateDevice();
     CreateContext();
+    InitListener();
 }
 
 void AudioSystem::Shutdown()
@@ -80,6 +81,13 @@ void AudioSystem::CreateContext()
     ALCboolean bSuccess = ALC_FALSE;
     assert(alcCall(alcMakeContextCurrent, m_device, bSuccess, m_context));
     assert(bSuccess == ALC_TRUE);
+}
+
+void AudioSystem::InitListener()
+{
+    alCall(alListener3f, AL_POSITION, 0.f, 0.f, 0.f);
+    const std::array<float, 6> dir{0.f, 0.f, -1.f, 0.f, 1.f, 0.f};
+    alCall(alListenerfv, AL_ORIENTATION, dir.data());
 }
 
 AudioSample* AudioSystem::GetSample(const std::string &name) const

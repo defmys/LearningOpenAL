@@ -42,6 +42,7 @@ public:
 private:
     void CreateDevice();
     void CreateContext();
+    void InitListener();
     AudioSample* GetSample(const std::string& name) const;
 
 private:
