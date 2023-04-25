@@ -258,6 +258,16 @@ bool AudioSample::LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo)
     return true;
 }
 
+void AudioSample::UpdatePos()
+{
+    alCall(alSourcefv, m_source, AL_POSITION, m_pos.data());
+}
+
+void AudioSample::UpdateVelocity()
+{
+    alCall(alSourcefv, m_source, AL_VELOCITY, m_velocity.data());
+}
+
 bool AudioSample::CreateBuffer()
 {
     if (!alCall(alGenBuffers, 1, &m_buffer))
@@ -280,10 +290,10 @@ void AudioSample::CreateSource()
     alCall(alGenSources, 1, &m_source);
     alCall(alSourcef, m_source, AL_PITCH, 1);
     alCall(alSourcef, m_source, AL_GAIN, 1.0f);
-    alCall(alSource3f, m_source, AL_POSITION, -1.f, 0, 0);
-    alCall(alSource3f, m_source, AL_VELOCITY, 0, 0, 0);
     alCall(alSourcei, m_source, AL_LOOPING, AL_FALSE);
     alCall(alSourcei, m_source, AL_BUFFER, m_buffer);
+    UpdatePos();
+    UpdateVelocity();
 }
 
 void AudioSample::Play()
@@ -300,7 +310,21 @@ void AudioSample::Update()
     if (m_source)
     {
         alCall(alGetSourcei, m_source, AL_SOURCE_STATE, &m_state);
+        m_pos[0] += 0.016;
+        UpdatePos();
     }
+}
+
+void AudioSample::SetPos(float x, float y, float z)
+{
+    m_pos = {x, y, z};
+    UpdatePos();
+}
+
+void AudioSample::SetVelocity(float x, float y, float z)
+{
+    m_velocity = {x, y, z};
+    UpdateVelocity();
 }
 
 AudioStreamingSample::AudioStreamingSample()
@@ -399,9 +423,9 @@ void AudioStreamingSample::CreateSource()
     alCall(alGenSources, 1, &m_source);
     alCall(alSourcef, m_source, AL_PITCH, 1);
     alCall(alSourcef, m_source, AL_GAIN, 1.0f);
-    alCall(alSource3f, m_source, AL_POSITION, 0, 0, 0);
-    alCall(alSource3f, m_source, AL_VELOCITY, 0, 0, 0);
     alCall(alSourcei, m_source, AL_LOOPING, AL_FALSE);
+    UpdatePos();
+    UpdateVelocity();
 
     alCall(alSourceQueueBuffers, m_source, NUM_BUFFERS, m_buffers.data());
 }

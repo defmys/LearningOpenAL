@@ -19,12 +19,15 @@ int main(int argc, const char** argv)
     audioSystem.Init();
 
     // std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem.wav";
-    std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem-mono.wav";
+    // std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem-mono.wav";
+    std::string wavFile = exeDir + "resource/engine-mono.mp3";
     audioSystem.CreateAudioSample("test", wavFile.c_str());
+    audioSystem.GetSample("test")->SetPos(-2.f, 0, 1);
+    audioSystem.GetSample("test")->SetVelocity(90.f, 0, 0);
     audioSystem.Play("test");
 
-    std::string swooshFile = exeDir + "resource/swoosh.mp3";
-    audioSystem.CreateAudioSample<AudioStreamingSample>("swoosh", swooshFile.c_str());
+    //std::string swooshFile = exeDir + "resource/swoosh.mp3";
+    //audioSystem.CreateAudioSample<AudioStreamingSample>("swoosh", swooshFile.c_str());
     // audioSystem.Play("swoosh");
     
     while (audioSystem.IsPlayingSometing())

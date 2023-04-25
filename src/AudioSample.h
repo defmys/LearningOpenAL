@@ -26,15 +26,24 @@ public:
     virtual void Update();
     ALint GetState() const { return m_state; }
 
+    void SetPos(float x, float y, float z);
+    void SetVelocity(float x, float y, float z);
+
 protected:
     virtual bool CreateBuffer();
     virtual void CreateSource();
+
+    void UpdatePos();
+    void UpdateVelocity();
 
 private:
     bool LoadFormat(SNDFILE* sndFile, const SF_INFO& sndInfo);
 
 private:
     ALuint m_buffer = AL_INVALID;
+
+    std::array<float, 3> m_pos = {0.f, 0.f, 0.f};  // x, y, z
+    std::array<float, 3> m_velocity = {0.f, 0.f, 0.f};  // x, y, z
 
 protected:
     AudioFormatContext m_context;

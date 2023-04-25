@@ -36,6 +36,8 @@ public:
 
         return true;
     }
+
+    AudioSample* GetSample(const std::string& name) const;
     void Play(const std::string& name);
     bool IsPlayingSometing() const;
 
@@ -43,7 +45,6 @@ private:
     void CreateDevice();
     void CreateContext();
     void InitListener();
-    AudioSample* GetSample(const std::string& name) const;
 
 private:
     ALCdevice* m_device = nullptr;
