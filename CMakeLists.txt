@@ -8,10 +8,10 @@ set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
     -I/opt/homebrew/include \
     ")
 
-project( learning_open_al )
+set(project_root ${CMAKE_CURRENT_SOURCE_DIR})
+set(source_root ${project_root}/src)
 
-set( target learning_open_al )
-file(GLOB_RECURSE source src/*.cpp)
+project( learning_open_al )
 
 find_library(
     openal
@@ -22,10 +22,7 @@ find_library(
 
 find_package(SndFile REQUIRED)
 
-add_executable(${target} ${source})
-add_dependencies(${target} copy_resources)
-target_include_directories(${target} PRIVATE /opt/homebrew/opt/openal-soft/include)
-target_link_libraries(${target} ${openal} SndFile::sndfile)
+add_subdirectory(src/Framework)
 
 add_custom_target(
     copy_resources
