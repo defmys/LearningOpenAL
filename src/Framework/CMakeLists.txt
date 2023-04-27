@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19.0)
 
-set( target learning_open_al )
+set( target learning_openal )
 
 file(GLOB_RECURSE source ${source_root}/*.cpp)
 
@@ -12,4 +12,7 @@ set_target_properties(${target} PROPERTIES
 add_dependencies(${target} copy_resources)
 target_include_directories(${target} PRIVATE /opt/homebrew/opt/openal-soft/include)
 target_link_libraries(${target} ${openal} SndFile::sndfile)
-
+target_link_libraries(
+    ${target}
+    Api
+)

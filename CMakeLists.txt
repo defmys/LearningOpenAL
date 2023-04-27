@@ -11,7 +11,7 @@ set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
 set(project_root ${CMAKE_CURRENT_SOURCE_DIR})
 set(source_root ${project_root}/src)
 
-project( learning_open_al )
+project( learning_openal )
 
 find_library(
     openal
@@ -23,6 +23,7 @@ find_library(
 find_package(SndFile REQUIRED)
 
 add_subdirectory(src/Framework)
+add_subdirectory(src/Examples)
 
 add_custom_target(
     copy_resources
