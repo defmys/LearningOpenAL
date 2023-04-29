@@ -6,6 +6,7 @@
 #include "helperfunctions.h"
 
 #include "Examples/Api/ApiExample.h"
+#include "Examples/Streaming/Streaming.h"
 
 #include "AL/alc.h"
 #include "AL/al.h"
@@ -24,6 +25,7 @@ int main(int argc, const char** argv)
 
     std::map<std::string, std::unique_ptr<AudioExample>> examples;
     examples.emplace("Api", std::make_unique<ApiExample>());
+    examples.emplace("Streaming", std::make_unique<StreamingExample>());
 
     std::string fullPath(argv[0]);
     std::string exeDir = fullPath.substr(0, fullPath.rfind("/") + 1);
@@ -47,15 +49,13 @@ int main(int argc, const char** argv)
         pExample->Run();
     }
 
+    /*
     std::string wavFile = exeDir + "resource/engine-mono.mp3";
     audioSystem->CreateAudioSample("test", wavFile.c_str());
     audioSystem->GetSample("test")->SetPos(-2.f, 0, 1);
     audioSystem->GetSample("test")->SetVelocity(90.f, 0, 0);
     audioSystem->Play("test");
-
-    //std::string swooshFile = exeDir + "resource/swoosh.mp3";
-    //audioSystem.CreateAudioSample<AudioStreamingSample>("swoosh", swooshFile.c_str());
-    // audioSystem.Play("swoosh");
+    */
     
     while (audioSystem->IsPlayingSometing())
     {
