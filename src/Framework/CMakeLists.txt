@@ -14,7 +14,6 @@ set_target_properties(${target} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
-add_dependencies(${target} copy_resources)
 target_include_directories(${target} PRIVATE ${source_root})
 target_include_directories(${target} PRIVATE /opt/homebrew/opt/openal-soft/include)
 target_include_directories(${target} PRIVATE ${CMAKE_BINARY_DIR})

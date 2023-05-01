@@ -19,11 +19,6 @@ find_package(SndFile REQUIRED)
 add_subdirectory(src/Examples)
 add_subdirectory(src/Framework)
 
-add_custom_target(
-    copy_resources
-    COMMAND cp -r ${CMAKE_CURRENT_LIST_DIR}/resource/ ${CMAKE_CURRENT_BINARY_DIR}/resource/
-)
-
 message("Registered Examples: ${example_targets}")
 
 #Include headers

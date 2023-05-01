@@ -9,6 +9,7 @@ public:
 
     virtual void Prepare(AudioSystem* pAudioSystem);
     virtual void Run() = 0;
+    virtual void Update() {};
 
 protected:
     AudioSystem* m_pAudioSystem = nullptr;

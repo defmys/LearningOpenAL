@@ -46,18 +46,16 @@ int main(int argc, const char** argv)
         pExample->Prepare(audioSystem.get());
         pExample->Run();
     }
-
-    /*
-    std::string wavFile = exeDir + "resource/engine-mono.mp3";
-    audioSystem->CreateAudioSample("test", wavFile.c_str());
-    audioSystem->GetSample("test")->SetPos(-2.f, 0, 1);
-    audioSystem->GetSample("test")->SetVelocity(90.f, 0, 0);
-    audioSystem->Play("test");
-    */
     
     while (audioSystem->IsPlayingSometing())
     {
         audioSystem->Update();
+
+        if (pExample)
+        {
+            pExample->Update();
+        }
+
         usleep(30000.f);
     };
 

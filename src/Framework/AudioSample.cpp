@@ -310,8 +310,6 @@ void AudioSample::Update()
     if (m_source)
     {
         alCall(alGetSourcei, m_source, AL_SOURCE_STATE, &m_state);
-        m_pos[0] += 0.016;
-        UpdatePos();
     }
 }
 
