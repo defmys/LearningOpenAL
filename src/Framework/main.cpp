@@ -5,8 +5,7 @@
 #include "AudioExample.h"
 #include "helperfunctions.h"
 
-#include "Examples/Api/ApiExample.h"
-#include "Examples/Streaming/Streaming.h"
+#include "includes.inl"
 
 #include "AL/alc.h"
 #include "AL/al.h"
@@ -24,8 +23,7 @@ int main(int argc, const char** argv)
     }
 
     std::map<std::string, std::unique_ptr<AudioExample>> examples;
-    examples.emplace("Api", std::make_unique<ApiExample>());
-    examples.emplace("Streaming", std::make_unique<StreamingExample>());
+    #include "register_examples.inl";
 
     std::string fullPath(argv[0]);
     std::string exeDir = fullPath.substr(0, fullPath.rfind("/") + 1);

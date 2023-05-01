@@ -2,7 +2,7 @@
 
 #include "Framework/AudioExample.h"
 
-class StreamingExample: public AudioExample
+class Streaming: public AudioExample
 {
 public:
     virtual void Run() override;

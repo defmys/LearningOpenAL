@@ -3,7 +3,7 @@
 #include "Framework/AudioSystem.h"
 #include <string>
 
-void StreamingExample::Run()
+void Streaming::Run()
 {
     std::string swooshFile = "Streaming/swoosh.mp3";
     m_pAudioSystem->CreateAudioSample<AudioStreamingSample>("swoosh", swooshFile.c_str());

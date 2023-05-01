@@ -11,7 +11,7 @@ void ApiExample::Prepare(AudioSystem* pAudioSystem)
 void ApiExample::Run()
 {
     const std::string sampleName("test");
-    std::string wavFile = "Api/iamtheprotectorofthissystem.wav";
+    std::string wavFile = "ApiExample/iamtheprotectorofthissystem.wav";
     // std::string wavFile = exeDir + "resource/iamtheprotectorofthissystem-mono.wav";
     m_pAudioSystem->CreateAudioSample(sampleName, wavFile.c_str());
     m_pAudioSystem->GetSample(sampleName)->SetPos(-2.f, 0, 1);
