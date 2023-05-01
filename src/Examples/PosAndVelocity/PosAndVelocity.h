@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/AudioExample.h"
+#include "Examples/AudioExample.h"
 #include <array>
 
 class PosAndVelocity: public AudioExample

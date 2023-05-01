@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/AudioExample.h"
+#include "Examples/AudioExample.h"
 
 class AudioSystem;
 

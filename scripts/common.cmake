@@ -15,6 +15,7 @@ macro(add_example target)
 
     add_custom_target(
         copy_${target}_resources
+        COMMAND mkdir -p ${PROJECT_BINARY_DIR}/resource/ || (exit 0)
         COMMAND cp -r ${CMAKE_CURRENT_LIST_DIR}/resource/ ${PROJECT_BINARY_DIR}/resource/${target}/ || (exit 0)
     )
 

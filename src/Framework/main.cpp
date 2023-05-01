@@ -2,7 +2,7 @@
 
 #include "AudioSystem.h"
 #include "AudioSample.h"
-#include "AudioExample.h"
+#include "Examples/AudioExample.h"
 #include "helperfunctions.h"
 
 #include "includes.inl"
