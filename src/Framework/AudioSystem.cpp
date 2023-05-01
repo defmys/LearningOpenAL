@@ -8,6 +8,11 @@
 #include <cassert>
 #include <iostream>
 
+AudioSystem::AudioSystem(const std::string &resourceRoot)
+    : m_resourceRoot(resourceRoot)
+{
+}
+
 void AudioSystem::Init()
 {
     CreateDevice();

@@ -12,6 +12,8 @@ struct ALCcontext;
 class AudioSystem
 {
 public:
+    explicit AudioSystem(const std::string& resourceRoot);
+
     void Init();
     void Shutdown();
     void Update();
@@ -26,7 +28,9 @@ public:
         }
 
         std::unique_ptr<AudioSample> newSample = std::make_unique<T>();
-        if (!newSample->LoadResource(resourcePath))
+        std::string fullPath(m_resourceRoot);
+        fullPath.append(resourcePath);
+        if (!newSample->LoadResource(fullPath.c_str()))
         {
             std::cerr << "Failed to create AudioSample. " << name << std::endl;
             return false;
@@ -47,6 +51,8 @@ private:
     void InitListener();
 
 private:
+    const std::string m_resourceRoot;
+
     ALCdevice* m_device = nullptr;
     ALCcontext* m_context = nullptr;
 

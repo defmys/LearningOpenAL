@@ -1,17 +1,11 @@
 cmake_minimum_required(VERSION 3.19.0)
 
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-    -std=c++20 \
-    -Wall \
-    -Werror \
-    -I/usr/local/include \
-    -I/opt/homebrew/include \
-    ")
+set(project_root ${CMAKE_CURRENT_SOURCE_DIR})
+set(source_root ${project_root}/src)
 
-project( learning_open_al )
+include(${project_root}/scripts/common.cmake)
 
-set( target learning_open_al )
-file(GLOB_RECURSE source src/*.cpp)
+project( learning_openal )
 
 find_library(
     openal
@@ -22,12 +16,24 @@ find_library(
 
 find_package(SndFile REQUIRED)
 
-add_executable(${target} ${source})
-add_dependencies(${target} copy_resources)
-target_include_directories(${target} PRIVATE /opt/homebrew/opt/openal-soft/include)
-target_link_libraries(${target} ${openal} SndFile::sndfile)
+add_subdirectory(src/Examples)
+add_subdirectory(src/Framework)
 
-add_custom_target(
-    copy_resources
-    COMMAND cp -r ${CMAKE_CURRENT_LIST_DIR}/resource/ ${CMAKE_CURRENT_BINARY_DIR}/resource/
-)
+message("Registered Examples: ${example_targets}")
+
+#Include headers
+foreach(example_target ${example_targets})
+    list(APPEND include_example_headers_list "#include \"Examples/${example_target}/${example_target}.h\"")
+endforeach()
+list(JOIN include_example_headers_list ";\n" include_example_headers)
+string(APPEND include_example_headers ";\n")
+
+configure_file(${source_root}/Framework/includes.inl.in includes.inl)
+
+#Register example instances.
+foreach(example_target ${example_targets})
+    list(APPEND register_example_list "examples.emplace(\"${example_target}\", std::make_unique<${example_target}>())")
+endforeach()
+list(JOIN register_example_list ";\n" register_examples)
+string(APPEND register_examples ";\n")
+configure_file(${source_root}/Framework/register_examples.inl.in register_examples.inl)
